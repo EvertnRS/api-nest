@@ -41,12 +41,32 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const { name, password } = updateUserDto;
+
+    if (this.findOne(id) === null) {
+      throw new Error("This user don't exist");
+    }
+
+    const passwordCrypted = await bcrypt.hash(password, 10);
+
+    const updateUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        name,
+        password: passwordCrypted,
+      },
+    });
+
+    return { id: updateUser.id };
   }
 
   remove(id: number) {
