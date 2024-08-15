@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 import { UpdateHotelDto } from './dto/update-hotel.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -43,12 +43,27 @@ export class HotelsService {
     return `This action returns all hotels`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} hotel`;
+  async findOne(id: number) {
+    const hotelFound = await this.prisma.hotel.findUnique({ where: { id } });
+
+    return hotelFound;
   }
 
-  update(id: number, updateHotelDto: UpdateHotelDto) {
-    return `This action updates a #${id} hotel`;
+  async update(id: number, updateHotelDto: UpdateHotelDto) {
+    const hotelFound = await this.findOne(id);
+
+    if (!hotelFound) {
+      throw new NotFoundException();
+    }
+
+    const hotelUpdated = await this.prisma.hotel.update({
+      where: { id },
+      data: {
+        ...updateHotelDto,
+      },
+    });
+
+    return hotelUpdated;
   }
 
   remove(id: number) {

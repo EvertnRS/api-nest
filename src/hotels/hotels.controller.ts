@@ -30,7 +30,7 @@ export class HotelsController {
     return this.hotelsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateHotelDto: UpdateHotelDto) {
     return this.hotelsService.update(+id, updateHotelDto);
   }
